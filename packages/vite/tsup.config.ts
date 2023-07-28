@@ -7,6 +7,7 @@ export default defineConfig({
   clean: true,
   outDir: './dist',
   dts: true,
+  target:'es6',
   external: ['cheerio'],
   format: ['cjs', 'esm'],
 })

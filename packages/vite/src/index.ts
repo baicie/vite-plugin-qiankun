@@ -1,8 +1,8 @@
 import type { CheerioAPI, Element } from 'cheerio'
 import { load } from 'cheerio'
-import type { PluginOption } from 'vite'
+import type { Plugin, PluginOption } from 'vite'
 
-function createQiankunHelper(qiankunName: string) {
+function createQiankunHelper (qiankunName: string) {
   return `
   const createDeffer = (hookName) => {
     const d = new Promise((resolve, reject) => {
@@ -27,7 +27,7 @@ function createQiankunHelper(qiankunName: string) {
 `
 }
 
-function createImportFinallyResolve(qiankunName: string) {
+function createImportFinallyResolve (qiankunName: string) {
   return `
     const qiankunLifeCycle = window.moudleQiankunAppLifeCycles && window.moudleQiankunAppLifeCycles['${qiankunName}'];
     if (qiankunLifeCycle) {
@@ -42,21 +42,18 @@ function createImportFinallyResolve(qiankunName: string) {
 export interface MicroOption {
   useDevMode?: boolean
 }
-type PluginFn = (qiankunName: string, microOption?: MicroOption) => PluginOption
 
-const htmlPlugin: PluginFn = (qiankunName, microOption = {}) => {
+export default function htmlPlugin (qiankunName: string, microOption?: MicroOption): PluginOption[] {
   let isProduction: boolean
   let base = ''
 
   const module2DynamicImport = ($: CheerioAPI, scriptTag: Element | undefined) => {
-    if (!scriptTag)
-      return
+    if (!scriptTag) { return }
 
     const script$ = $(scriptTag)
     const moduleSrc = script$.attr('src')
     let appendBase = ''
-    if (microOption.useDevMode && !isProduction)
-      appendBase = '(window.proxy ? (window.proxy.__INJECTED_PUBLIC_PATH_BY_QIANKUN__ + \'..\') : \'\') + '
+    if (microOption?.useDevMode && !isProduction) { appendBase = '(window.proxy ? (window.proxy.__INJECTED_PUBLIC_PATH_BY_QIANKUN__ + \'..\') : \'\') + ' }
 
     script$.removeAttr('src')
     script$.removeAttr('type')
@@ -64,17 +61,17 @@ const htmlPlugin: PluginFn = (qiankunName, microOption = {}) => {
     return script$
   }
 
-  return {
+  const qiankun: Plugin = {
     name: 'qiankun-html-transform',
-    configResolved(config) {
+    configResolved (config) {
       isProduction = config.command === 'build' || config.isProduction
       base = config.base
     },
 
-    configureServer(server) {
+    configureServer (server) {
       return () => {
         server.middlewares.use((req, res, next) => {
-          if (isProduction || !microOption.useDevMode) {
+          if (isProduction || !microOption?.useDevMode) {
             next()
             return
           }
@@ -94,27 +91,43 @@ const htmlPlugin: PluginFn = (qiankunName, microOption = {}) => {
         })
       }
     },
-    transformIndexHtml(html: string) {
-      const $ = load(html)
-      const moduleTags = $('body script[type=module], head script[crossorigin=""]')
-      if (!moduleTags || !moduleTags.length)
-        return
+    transformIndexHtml (html: string) {
+      const temp = load(html)
+      const moduleTags = temp('head script[type=module], body script[type=module], head script[crossorigin=""]')
+      if (!moduleTags || !moduleTags.length) { return }
 
       const len = moduleTags.length
       moduleTags.each((i, moduleTag) => {
-        const script$ = module2DynamicImport($, moduleTag)
-        if (len - 1 === i) {
-          script$?.html(`${script$.html()}.finally(() => {
-            ${createImportFinallyResolve(qiankunName)}
-          })`)
+        if (i === 0) {
+          const tag = temp(moduleTag)
+          tag.empty()
+          tag.remove('type')
+          tag.html(`
+            import((window.proxy ? (window.proxy.__INJECTED_PUBLIC_PATH_BY_QIANKUN__ + '..') : '') + '/@react-refresh').then((res)=>{
+              const { injectIntoGlobalHook } = res.default
+              const parentWindow = window.parent;
+              injectIntoGlobalHook(parentWindow)
+              parentWindow.$RefreshReg$ = () => {}
+              parentWindow.$RefreshSig$ = () => (type) => type
+              parentWindow.__vite_plugin_react_preamble_installed__ = true
+              console.log('RefreshReg',parentWindow)
+            })
+          `)
+        } else {
+          if (len - 1 === i) {
+            const script$ = module2DynamicImport(temp, moduleTag)
+            script$?.html(`${script$.html()}.finally(() => {
+              ${createImportFinallyResolve(qiankunName)}
+            })`)
+          }
         }
       })
 
-      $('body').append(`<script>${createQiankunHelper(qiankunName)}</script>`)
-      const output = $.html()
+      temp('body').append(`<script>${createQiankunHelper(qiankunName)}</script>`)
+      const output = temp.html()
       return output
-    },
+    }
   }
-}
 
-export default htmlPlugin
+  return [qiankun]
+}

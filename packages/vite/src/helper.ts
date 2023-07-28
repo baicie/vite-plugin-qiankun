@@ -1,7 +1,7 @@
 export interface QiankunProps {
   container?: HTMLElement
   [x: string]: any
-};
+}
 
 export interface QiankunLifeCycle {
   bootstrap: () => void | Promise<void>

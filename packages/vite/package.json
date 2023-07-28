@@ -1,0 +1,39 @@
+{
+  "name": "@baicie/vite-plugin-qiankun",
+  "version": "0.1.0",
+  "description": "vite for qiankun",
+  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm run build-bundle",
+    "build-bundle": "tsup",
+    "dev": "rimraf dist && pnpm run build-bundle --watch src"
+  },
+  "keywords": [
+    "qiankun",
+    "vite",
+    "esm",
+    "esModule"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": "./*"
+  },
+  "homepage": "https://github.com/baicie/vite-plugin-qiankun",
+  "author": "baicie",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "peerDependencies": {
+    "vite": ">=4"
+  }
+}

@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
+import qiankun from '@baicie/vite-plugin-qiankun'
 import react from '@vitejs/plugin-react'
-import qiankun from "../../es";
 
 const useDevMode = true
 
@@ -8,7 +8,7 @@ const useDevMode = true
 export default defineConfig({
   plugins: [
     // useDevMode = true 时不开启热更新
-    // react(),
+    react(),
     qiankun('reac18', {
       useDevMode
     })
@@ -16,6 +16,6 @@ export default defineConfig({
   base: '/',
   server: {
     port: 7107,
-    cors: true,
-  },
+    cors: true
+  }
 })
