@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 import qiankun from '@baicie/vite-plugin-qiankun'
 
-const useDevMode = true
+const useDevMode = false
 
 // https://vitejs.dev/config/
 export default defineConfig({

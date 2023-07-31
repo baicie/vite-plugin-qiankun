@@ -8,19 +8,18 @@ const useDevMode = true
 const baseConfig: UserConfig = {
   plugins: [
     qiankun('viteapp', {
-      useDevMode,
-    }),
+      useDevMode
+    })
   ],
   server: {
     port: 7106,
-    cors: true,
-  },
+    cors: true
+  }
 }
 
 export default ({ mode }: any) => {
   baseConfig.base = 'http://127.0.0.1:7106/'
-  if (mode === 'development')
-    baseConfig.base = '/'
+  if (mode === 'development') { baseConfig.base = '/' }
 
   return baseConfig
 }
