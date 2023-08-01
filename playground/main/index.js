@@ -30,11 +30,11 @@ registerMicroApps(
       activeRule: '/vue3'
     },
     {
-      name: 'reac18',
-      entry: 'http://127.0.0.1:5174',
+      name: 'react',
+      entry: 'http://127.0.0.1:5173',
       container: '#subapp-viewport',
       loader,
-      activeRule: '/react18'
+      activeRule: '/react'
     }
   ],
   {
