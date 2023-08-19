@@ -1,6 +1,7 @@
 import type { CheerioAPI, Element } from 'cheerio'
 import { load } from 'cheerio'
 import type { Plugin, PluginOption } from 'vite'
+import httpProxy, { ServerOptions } from 'http-proxy'
 
 function createQiankunHelper (qiankunName: string) {
   return `
@@ -71,7 +72,8 @@ export default function htmlPlugin (qiankunName: string, microOption?: MicroOpti
     configureServer (server) {
       return () => {
         server.middlewares.use((req, res, next) => {
-          if (isProduction || !microOption?.useDevMode) {
+          console.log('child', req.url)
+          if (isProduction) {
             next()
             return
           }
@@ -130,4 +132,26 @@ export default function htmlPlugin (qiankunName: string, microOption?: MicroOpti
   }
 
   return [qiankun]
+}
+
+export function qiankunMain (qiankun?:Record<string, any>, proxyOptions?:ServerOptions):PluginOption[] {
+  const proxy = httpProxy.createProxyServer(proxyOptions)
+  const plugin:Plugin = {
+    name: 'qiankun-main',
+    configureServer (server) {
+      return () => {
+        server.middlewares.use((req, res, next) => {
+          console.log('main', req.url)
+          if (!req.url?.endsWith('html')) {
+            proxy.web(req, res, { target: 'http://localhost:9810/app/reporting/' })
+            proxy.on('error', (error) => {
+              console.log('error', error)
+            })
+          }
+          next()
+        })
+      }
+    }
+  }
+  return [plugin]
 }

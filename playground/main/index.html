@@ -2,31 +2,15 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>QianKun Example</title>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>settings</title>
 </head>
 
 <body>
-  <div class="mainapp">
-    <!-- 标题栏 -->
-    <header class="mainapp-header">
-      <h1>qk</h1>
-    </header>
-    <div class="mainapp-main">
-      <!-- 侧边栏 -->
-      <ul class="mainapp-sidemenu">
-        <li onclick="push('/vue3')">vue3</li>
-        <li onclick="push('/react')">react</li>
-      </ul>
-      <!-- 子应用  -->
-      <main id="subapp-container"></main>
-    </div>
-  </div>
-
-  <script>
-    function push(subapp) { history.pushState(null, subapp, subapp) }
-  </script>
-  <script type="module" src="/index.js"></script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>
